@@ -1,0 +1,282 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+/* Style for the thinking message */
+.message.thinking-wavy {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Style for the dots with wavy animation */
+.thinking-wavy .dots {
+    display: inline-block;
+    width: 30px; /* Fixed width to prevent layout shift */
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.thinking-wavy .dots::after {
+    content: "...";
+    display: inline-block;
+    animation: wave 1.5s infinite;
+}
+
+
+.message.thinking {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+>>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
+>>>>>>> c30e052 (Fixed bugs and added new features)
+
+body {
+    background-color: #2d3748; /* Soft light gray background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    display: flex;
+    width: 900px;
+    height: 600px;
+    background-color: #1f2937; /* White background for a clean look */
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 30%;
+    background-color: #1f2937; /* Darker, professional navy */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 24px;
+    background-color: #1f2937;
+    color: #c5c6c7;
+    text-align: center;
+}
+
+.logo {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 12px;
+    display: block;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.sidebar-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.new-chat-btn {
+    margin-top: 16px;
+    padding: 10px 20px;
+    background-color: #46a29f; /* Professional blue */
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.new-chat-btn:hover {
+    background-color: #46a29f; /* Slightly darker blue on hover */
+}
+
+.contact-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.contact {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #2d3748; /* Subtle border */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact:hover {
+    background-color: #2d3748; /* Subtle hover effect */
+}
+
+.contact.active {
+    background-color: #2d3748; /* Highlight active chat */
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #66fcf1; /* Soft blue avatar */
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-info p {
+    color: #e5e7eb; /* Light gray text */
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.contact-info small {
+    color: #9ca3af; /* Muted gray for preview */
+    font-size: 13px;
+}
+
+.delete-chat-btn {
+    background: none;
+    border: none;
+    color: #ef4444; /* Red for delete */
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    transition: color 0.3s ease;
+}
+
+.delete-chat-btn:hover {
+    color: #dc2626; /* Darker red on hover */
+}
+
+/* Chat Area */
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 20px;
+    background-color: #1f2937; /* Light gray header */
+    color: #c5c6c7; /* Dark text */
+    text-align: center;
+    border-bottom: 1px solid #2d3748;
+    border-left: 1px solid #2d3748;
+}
+
+.chat-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background-color: #1f2937; /* Very light gray background */
+    border-left: 1px solid #2d3748;
+}
+
+.message {
+    max-width: 70%;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.message.received {
+    background-color: #e5e7eb; /* Light gray for received messages */
+    color: #1f2937;
+    align-self: flex-start;
+}
+
+.message.sent {
+    background-color: #46a29f; /* Blue for sent messages */
+    color: #ffffff;
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+.chat-input {
+    display: flex;
+    padding: 16px;
+    background-color: #1f2937;
+    border: 1px solid #2d3748;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    background-color: #1f2937;
+    color: #c5c6c7;
+    outline: none;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.chat-input input:focus {
+    border-color: #3b82f6;
+}
+
+.chat-input button {
+    padding: 12px 24px;
+    margin-left: 12px;
+    background-color: #46a29f;
+    color: #1f2937;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.chat-input button:hover {
+    background-color: #66fcf1;
+}
+
+/* Scrollbar Styling */
+.chat-messages::-webkit-scrollbar,
+.contact-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.contact-list::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.contact-list::-webkit-scrollbar-track {
+    background-color: #f1f5f9;
+}
+
+/* Powered By Section */
+.powered-by {
+    padding: 16px;
+    text-align: center;
+    background-color: #1a1f2b;
+    border-top: 1px solid #2d3748;
+}
+
+.powered-by p {
+    color: #9ca3af;
+    font-size: 12px;
+    margin: 0;
+}

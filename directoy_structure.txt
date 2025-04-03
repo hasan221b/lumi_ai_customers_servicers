@@ -1,0 +1,41 @@
+lumi-chatbot-rag/
+├── config/
+│   └── config.yml
+├── logs/
+│   ├── app.log
+│   └── pipeline.log
+├── src/
+│   ├── __init__.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── app.py  
+│   ├── database/
+│   │   ├── __init__.py
+│   │   └── db.py 
+│   ├── model/
+│   │   ├── __init__.py
+│   │   └── load_models.py
+│   ├── processing/
+│   │   ├── __init__.py
+│   │   ├── data_embedder.py
+│   │   ├── data_index.py
+│   │   └── data_loader.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   ├── setting.py
+│   │   └── config.py
+│   └── rag/
+│       ├── __init__.py
+│       ├── answer_generator.py  
+│       └── retriever.py
+├── data/
+│   └── faqs.csv
+├── frontend/
+│   ├── index.html
+│   ├── styles.css
+│   ├── script.js  
+│   └── assets/
+│       └── bot-icon.png
+└── chatbot.db
+└── .env

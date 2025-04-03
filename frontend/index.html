@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi Chatbot</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+<<<<<<< HEAD
+                <img src="/static/assets/bot-icon.png" alt="NeuroSphere Lab Logo" class="logo">
+=======
+<<<<<<< HEAD
+                <img src="/static/assets/bot-icon.png" alt="NeuroSphere Lab Logo" class="logo">
+=======
+                <img src="/static/bot-icon.png" alt="NeuroSphere Lab Logo" class="logo">
+>>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
+>>>>>>> c30e052 (Fixed bugs and added new features)
+                <h2>Chats</h2>
+                <button class="new-chat-btn" onclick="startNewChat()">New Chat with Bot</button>
+            </div>
+            <div class="contact-list" id="contact-list">
+                <!-- Contacts will be added dynamically -->
+            </div>
+            <div class="powered-by">
+                <p>Powered by NeuroSphere Lab</p>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" id="chat-header">
+                <h2></h2>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added dynamically -->
+            </div>
+            <div class="chat-input">
+                <input type="text" placeholder="Type a message..." id="message-input">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

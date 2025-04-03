@@ -1,0 +1,14 @@
+logging:
+  level: "INFO"
+  pipeline_log_file: "logs/pipeline.log"
+  app_log_file: "logs/app.log"
+  format: "[%(asctime)s] - %(levelname)s - %(message)s"
+  datefmt: "%Y-%m-%d %H:%M:%S"
+  
+embedding_model: 'sentence-transformers/all-MiniLM-L6-v2'
+sentiment_model: 'distilbert-base-uncased-finetuned-sst-2-english'
+zero_shot_model: 'cross-encoder/nli-distilroberta-base'
+llm_model : 'gpt-4o-mini'
+faqs_path: 'data\faqs.csv'
+index_path: 'data\index.bin'
+temperature: 0.2
