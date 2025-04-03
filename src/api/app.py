@@ -18,22 +18,11 @@ from langchain.memory import ConversationSummaryMemory
 
 class ChatbotAPI:
     def __init__(self):
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
+        
         '''Initialize the chatbot API components'''
-        app_logger.info('Starting the app initialization...')
-
-        #Initialize models
-<<<<<<< HEAD
-=======
-=======
         app_logger.info('Starting the app initialization...')
         
         # Initialize models
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
         app_logger.info('Initialize models...')
         self.model_loader = ModelLoader()
         self.embedding_model = self.model_loader.embedding_model
@@ -42,10 +31,6 @@ class ChatbotAPI:
         self.zero_shot_model = self.model_loader.zero_shot_model
         app_logger.info('Models initialized successfully')
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
         #Process data
         app_logger.info('Processing data...')
         self.df = DataLoader().load_data()
@@ -58,28 +43,10 @@ class ChatbotAPI:
         self.retriver = Retriever(self.embedding_model,self.index,self.df)
         self.answer_generator = AnswerGenerator(self.llm_model, self.retriver,self.sentiment_analyzer,self.zero_shot_model)
         app_logger.info('RAG components initialized successfully')
-        
-<<<<<<< HEAD
-=======
-=======
-        # Process data
-        app_logger.info('Processing data...')
-        self.df = DataLoader().load_data()
-        self.embed_df = DataEmbedder(self.embedding_model, self.df).embed_data()
-        self.index = FaissIndex(self.df).data_index()
-        app_logger.info('Data processing completed successfully')
-
-        # Initialize RAG components
-        app_logger.info('Initializing RAG components...')
-        self.retriever = Retriever(self.embedding_model, self.index, self.df)
-        self.answer_generator = AnswerGenerator(self.llm_model, self.retriever, self.sentiment_analyzer, self.zero_shot_model)
-        app_logger.info('RAG components initialized successfully')
-        
+                 
         # Dictionary to store memory per chat_id
         self.chat_memories = {}
-
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
+        
         # Create FastAPI app
         app_logger.info('Initialize API...')
         self.app = FastAPI()
@@ -89,37 +56,18 @@ class ChatbotAPI:
         frontend_path = Path(__file__).resolve().parent.parent.parent / "frontend"
         self.app.mount("/static", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
-
         # Enable CORS (if needed for local testing from a different port)
-        app_logger.info('Enabling CORS...')
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],  # Adjust this in production
-<<<<<<< HEAD
-=======
-=======
-        # Enable CORS
+
         app_logger.info('Enabling CORS...')
         self.app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
         )
         
         self._setup_routes()
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
-
         cleanup_old_chats()
 
     def _extract_topic(self, message):
@@ -127,17 +75,7 @@ class ChatbotAPI:
         words = [word for word in message.split() if len(word) > 3]
         return words[0].capitalize() if words else "General Chat"
     
-    def _setup_routes(self):
-        """Setup all API routes."""
-
-        @self.app.get('/')
-        async def read_root():
-            app_logger.info('Root endpoint accessed')
-            # Serve index.html instead of JSON
-<<<<<<< HEAD
-=======
-=======
-        cleanup_old_chats()
+            
     
     def _get_or_create_memory(self, chat_id):
         """Get or create a memory instance for a specific chat_id."""
@@ -152,8 +90,6 @@ class ChatbotAPI:
         @self.app.get('/')
         async def read_root():
             app_logger.info('Root endpoint accessed')
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             frontend_path = Path(__file__).resolve().parent.parent.parent / "frontend"
             return FileResponse(frontend_path / "index.html")
         
@@ -172,15 +108,7 @@ class ChatbotAPI:
                 cursor.execute("INSERT INTO users (user_id, created_at) VALUES (?, ?)", (user_id, datetime.now()))
                 conn.commit()
                 conn.close()
-<<<<<<< HEAD
-                response.set_cookie(key='user_id', value=user_id, httponly=True, max_age=604800)  # 7 days
-=======
-<<<<<<< HEAD
-                response.set_cookie(key='user_id', value=user_id, httponly=True, max_age=604800)  # 7 days
-=======
                 response.set_cookie(key='user_id', value=user_id, httponly=True, max_age=604800)
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             return {'user_id': user_id}
         
         @self.app.get('/chats/{user_id}')
@@ -200,10 +128,6 @@ class ChatbotAPI:
             chat_count = cursor.fetchone()[0]
             if chat_count >= 5:
                 conn.close()
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
                 raise HTTPException(status_code=403, detail="Maximum number of chats (5) reached")
             chat_name = f"Chat {chat_count + 1}"
             cursor.execute("INSERT INTO chats (user_id, chat_name, summary, created_at, last_updated) VALUES (?, ?, ?, ?, ?)",
@@ -211,39 +135,24 @@ class ChatbotAPI:
             chat_id = cursor.lastrowid
             conn.commit()
             conn.close()
-<<<<<<< HEAD
-=======
-=======
-                app_logger.error
-                raise HTTPException(status_code=403, detail="Maximum number of chats (5) reached")
-            chat_name = f"Chat {chat_count + 1}"
-            cursor.execute("INSERT INTO chats (user_id, chat_name, summary, created_at, last_updated) VALUES (?, ?, ?, ?, ?)",
-                        (user_id, chat_name, "", datetime.now(), datetime.now()))
-            chat_id = cursor.lastrowid
-            
-            # Insert a starter message
-            starter_message = "Hello! I'm Lumi, your e-commerce assistant. How can I help you today?"
-            cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
-                        (chat_id, "received", starter_message, datetime.now()))
-            
-            conn.commit()
-            conn.close()
-            
             # Create a new memory instance for this chat and ensure it’s fresh
             memory = self._get_or_create_memory(chat_id)
             memory.clear()  # Explicitly clear memory to ensure no old data
-            
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             return {'chat_id': chat_id, 'chat_name': chat_name}
 
         @self.app.get('/chat/{user_id}/{chat_id}/messages')
-        async def get_chat_messages(user_id: str, chat_id: int):
+        async def get_chat_messages(user_id: str, chat_id: str):
+            app_logger.info(f"Received request for user_id: {user_id}, chat_id: {chat_id}")
+            try:
+                chat_id_int = int(chat_id)
+            except ValueError:
+                raise HTTPException(status_code=422, detail="Invalid chat_id: must be an integer")
+            
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT message_type, message_text FROM messages WHERE chat_id = ? ORDER BY timestamp", (chat_id,))
+            cursor.execute("SELECT message_type, message_text FROM messages WHERE chat_id = ? ORDER BY timestamp", (chat_id_int,))
             messages = cursor.fetchall()
-            cursor.execute("SELECT chat_name FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
+            cursor.execute("SELECT chat_name FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id_int, user_id))
             chat = cursor.fetchone()
             conn.close()
             if not chat:
@@ -252,22 +161,11 @@ class ChatbotAPI:
                 'chat_name': chat['chat_name'],
                 'messages': [{'type': msg['message_type'], 'text': msg['message_text']} for msg in messages]
             }
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
-
-=======
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
+            
         @self.app.post('/chat/{user_id}/{chat_id}')
         async def chat(user_id: str, chat_id: int, query: Query):
             conn = get_db_connection()
             cursor = conn.cursor()
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
             
             # Check the number of sent messages for this chat
             cursor.execute("SELECT COUNT(*) FROM messages WHERE chat_id = ? AND message_type = 'sent'", (chat_id,))
@@ -277,79 +175,28 @@ class ChatbotAPI:
                 conn.close()
                 raise HTTPException(status_code=403, detail="Message limit reached (5 messages per chat). Start a new chat to continue.")
             
-            # Proceed if limit not reached
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             cursor.execute("SELECT summary FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
             chat = cursor.fetchone()
             if not chat:
                 conn.close()
                 raise HTTPException(status_code=404, detail="Chat not found")
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
-            summary = chat['summary']
-
-            # Store user message
+            summary = chat['summary'] or ""
+        
             cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
                            (chat_id, "sent", query.question, datetime.now()))
-
-            # Generate response with history
-            memory = ConversationSummaryMemory(llm=self.llm_model)
-            if summary:
-                memory.buffer = summary
-<<<<<<< HEAD
-=======
-=======
-            summary = chat['summary'] or ""  # Default to empty string if None
-
-            # Store user message
-            cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
-                        (chat_id, "sent", query.question, datetime.now()))
-
-            # Get or create memory for this chat
+        
             memory = self._get_or_create_memory(chat_id)
             memory.buffer = summary
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             history = memory.load_memory_variables({})['history']
             response = self.answer_generator.generator(query.question, history)
-
-            # Store bot response
+        
             cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
-<<<<<<< HEAD
                            (chat_id, "received", response, datetime.now()))
-=======
-<<<<<<< HEAD
-                           (chat_id, "received", response, datetime.now()))
-=======
-                        (chat_id, "received", response, datetime.now()))
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
-
-            # Update summary
+        
             memory.save_context({'input': query.question}, {'output': response})
             updated_summary = memory.buffer
             cursor.execute("UPDATE chats SET summary = ?, last_updated = ? WHERE chat_id = ?",
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
                            (updated_summary, datetime.now(), chat_id))
-            conn.commit()
-            conn.close()
-            return {'response': response}
-        
-        @self.app.delete('/chat/{user_id}/{chat_id}')
-        async def delete_chat(user_id: str, chat_id: str):
-
-            conn = get_db_connection()
-            cursor = conn.cursor()
-<<<<<<< HEAD
-=======
-=======
-                        (updated_summary, datetime.now(), chat_id))
             conn.commit()
             conn.close()
             return {'response': response}    
@@ -360,25 +207,10 @@ class ChatbotAPI:
             cursor = conn.cursor()
             # Clear the summary before deletion
             cursor.execute("UPDATE chats SET summary = '' WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
             cursor.execute("DELETE FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
             if cursor.rowcount == 0:
                 conn.close()
                 raise HTTPException(status_code=404, detail='Chat not found')
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
-            conn.commit()
-            conn.close()
-            return {'status':'success'}
-           
-
-        app_logger.info('Creating Chatbot API instance...')
-<<<<<<< HEAD
-=======
-=======
             cursor.execute("DELETE FROM messages WHERE chat_id = ?", (chat_id,))
             conn.commit()
             conn.close()
@@ -388,7 +220,6 @@ class ChatbotAPI:
                 del self.chat_memories[chat_id]  # Remove it from the dictionary
             return {'status': 'success'}
 
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
+
 chatbot_api = ChatbotAPI()
 app = chatbot_api.app
