@@ -18,8 +18,6 @@ from langchain.memory import ConversationSummaryMemory
 
 class ChatbotAPI:
     def __init__(self):
-        
-        '''Initialize the chatbot API components'''
         app_logger.info('Starting the app initialization...')
         
         # Initialize models
@@ -31,22 +29,22 @@ class ChatbotAPI:
         self.zero_shot_model = self.model_loader.zero_shot_model
         app_logger.info('Models initialized successfully')
 
-        #Process data
+        # Process data
         app_logger.info('Processing data...')
         self.df = DataLoader().load_data()
-        self.embed_df = DataEmbedder(self.embedding_model,self.df).embed_data()
+        self.embed_df = DataEmbedder(self.embedding_model, self.df).embed_data()
         self.index = FaissIndex(self.df).data_index()
         app_logger.info('Data processing completed successfully')
 
-        #Initialize RAG components
+        # Initialize RAG components
         app_logger.info('Initializing RAG components...')
-        self.retriver = Retriever(self.embedding_model,self.index,self.df)
-        self.answer_generator = AnswerGenerator(self.llm_model, self.retriver,self.sentiment_analyzer,self.zero_shot_model)
+        self.retriever = Retriever(self.embedding_model, self.index, self.df)
+        self.answer_generator = AnswerGenerator(self.llm_model, self.retriever, self.sentiment_analyzer, self.zero_shot_model)
         app_logger.info('RAG components initialized successfully')
-                 
+        
         # Dictionary to store memory per chat_id
         self.chat_memories = {}
-        
+
         # Create FastAPI app
         app_logger.info('Initialize API...')
         self.app = FastAPI()
@@ -56,8 +54,7 @@ class ChatbotAPI:
         frontend_path = Path(__file__).resolve().parent.parent.parent / "frontend"
         self.app.mount("/static", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
-        # Enable CORS (if needed for local testing from a different port)
-
+        # Enable CORS
         app_logger.info('Enabling CORS...')
         self.app.add_middleware(
             CORSMiddleware,
@@ -69,13 +66,6 @@ class ChatbotAPI:
         
         self._setup_routes()
         cleanup_old_chats()
-
-    def _extract_topic(self, message):
-        """Extract a topic from the first message using simple keyword extraction."""
-        words = [word for word in message.split() if len(word) > 3]
-        return words[0].capitalize() if words else "General Chat"
-    
-            
     
     def _get_or_create_memory(self, chat_id):
         """Get or create a memory instance for a specific chat_id."""
@@ -128,31 +118,34 @@ class ChatbotAPI:
             chat_count = cursor.fetchone()[0]
             if chat_count >= 5:
                 conn.close()
+                app_logger.error
                 raise HTTPException(status_code=403, detail="Maximum number of chats (5) reached")
             chat_name = f"Chat {chat_count + 1}"
             cursor.execute("INSERT INTO chats (user_id, chat_name, summary, created_at, last_updated) VALUES (?, ?, ?, ?, ?)",
-                           (user_id, chat_name, "", datetime.now(), datetime.now()))
+                        (user_id, chat_name, "", datetime.now(), datetime.now()))
             chat_id = cursor.lastrowid
+            
+            # Insert a starter message
+            starter_message = "Hello! I'm Lumi, your e-commerce assistant. How can I help you today?"
+            cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
+                        (chat_id, "received", starter_message, datetime.now()))
+            
             conn.commit()
             conn.close()
+            
             # Create a new memory instance for this chat and ensure it’s fresh
             memory = self._get_or_create_memory(chat_id)
             memory.clear()  # Explicitly clear memory to ensure no old data
+            
             return {'chat_id': chat_id, 'chat_name': chat_name}
 
         @self.app.get('/chat/{user_id}/{chat_id}/messages')
-        async def get_chat_messages(user_id: str, chat_id: str):
-            app_logger.info(f"Received request for user_id: {user_id}, chat_id: {chat_id}")
-            try:
-                chat_id_int = int(chat_id)
-            except ValueError:
-                raise HTTPException(status_code=422, detail="Invalid chat_id: must be an integer")
-            
+        async def get_chat_messages(user_id: str, chat_id: int):
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT message_type, message_text FROM messages WHERE chat_id = ? ORDER BY timestamp", (chat_id_int,))
+            cursor.execute("SELECT message_type, message_text FROM messages WHERE chat_id = ? ORDER BY timestamp", (chat_id,))
             messages = cursor.fetchall()
-            cursor.execute("SELECT chat_name FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id_int, user_id))
+            cursor.execute("SELECT chat_name FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
             chat = cursor.fetchone()
             conn.close()
             if not chat:
@@ -161,7 +154,6 @@ class ChatbotAPI:
                 'chat_name': chat['chat_name'],
                 'messages': [{'type': msg['message_type'], 'text': msg['message_text']} for msg in messages]
             }
-            
         @self.app.post('/chat/{user_id}/{chat_id}')
         async def chat(user_id: str, chat_id: int, query: Query):
             conn = get_db_connection()
@@ -175,28 +167,33 @@ class ChatbotAPI:
                 conn.close()
                 raise HTTPException(status_code=403, detail="Message limit reached (5 messages per chat). Start a new chat to continue.")
             
+            # Proceed if limit not reached
             cursor.execute("SELECT summary FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
             chat = cursor.fetchone()
             if not chat:
                 conn.close()
                 raise HTTPException(status_code=404, detail="Chat not found")
-            summary = chat['summary'] or ""
-        
+            summary = chat['summary'] or ""  # Default to empty string if None
+
+            # Store user message
             cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
-                           (chat_id, "sent", query.question, datetime.now()))
-        
+                        (chat_id, "sent", query.question, datetime.now()))
+
+            # Get or create memory for this chat
             memory = self._get_or_create_memory(chat_id)
             memory.buffer = summary
             history = memory.load_memory_variables({})['history']
             response = self.answer_generator.generator(query.question, history)
-        
+
+            # Store bot response
             cursor.execute("INSERT INTO messages (chat_id, message_type, message_text, timestamp) VALUES (?, ?, ?, ?)",
-                           (chat_id, "received", response, datetime.now()))
-        
+                        (chat_id, "received", response, datetime.now()))
+
+            # Update summary
             memory.save_context({'input': query.question}, {'output': response})
             updated_summary = memory.buffer
             cursor.execute("UPDATE chats SET summary = ?, last_updated = ? WHERE chat_id = ?",
-                           (updated_summary, datetime.now(), chat_id))
+                        (updated_summary, datetime.now(), chat_id))
             conn.commit()
             conn.close()
             return {'response': response}    
@@ -219,7 +216,6 @@ class ChatbotAPI:
                 self.chat_memories[chat_id].clear()  # Clear the memory buffer
                 del self.chat_memories[chat_id]  # Remove it from the dictionary
             return {'status': 'success'}
-
 
 chatbot_api = ChatbotAPI()
 app = chatbot_api.app
