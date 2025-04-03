@@ -9,6 +9,6 @@ embedding_model: 'sentence-transformers/all-MiniLM-L6-v2'
 sentiment_model: 'distilbert-base-uncased-finetuned-sst-2-english'
 zero_shot_model: 'cross-encoder/nli-distilroberta-base'
 llm_model : 'gpt-4o-mini'
-faqs_path: 'data\faqs.csv'
-index_path: 'data\index.bin'
+faqs_path: 'data/faqs.csv'
+index_path: 'data/index.bin'
 temperature: 0.2
