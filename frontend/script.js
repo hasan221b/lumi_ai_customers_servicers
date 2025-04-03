@@ -1,3 +1,5 @@
+js
+
 let currentChatId = null;
 let currentUserId = null;
 
@@ -47,15 +49,7 @@ async function startNewChat() {
         <div class="avatar"></div>
         <div class="contact-info">
             <p>${data.chat_name}</p>
-<<<<<<< HEAD
             <small>No messages yet...</small>
-=======
-<<<<<<< HEAD
-            <small>No messages yet...</small>
-=======
-            <small>Hello! I'm Lumi...</small> <!-- Reflect starter message -->
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
         </div>
         <button class="delete-chat-btn" onclick="deleteChat(${data.chat_id})">Delete</button>
     `;
@@ -69,6 +63,7 @@ async function startNewChat() {
 }
 
 async function openChat(chatId) {
+    console.log(`Opening chat with chatId: ${chatId}, type: ${typeof chatId}`);
     currentChatId = chatId;
     const contacts = document.querySelectorAll('.contact');
     contacts.forEach(contact => {
@@ -77,6 +72,7 @@ async function openChat(chatId) {
             contact.classList.add('active');
         }
     });
+    
 
     // Fetch and display chat messages
     const response = await fetch(`/chat/${currentUserId}/${chatId}/messages`);
@@ -124,77 +120,23 @@ async function sendMessage() {
     input.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-    // Add "thinking..." indicator
-    const thinkingMessage = document.createElement('div');
-    thinkingMessage.classList.add('message', 'received', 'thinking');
-    thinkingMessage.innerHTML = `<p>Thinking...</p>`;
-    chatMessages.appendChild(thinkingMessage);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
     try {
-        const response = await fetch(`/chat/${currentUserId}/${currentChatId}`, {
+        const url = `/chat/${currentUserId}/${currentChatId}`;
+        console.log(`Sending POST request to: ${url}`);
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question: messageText })
         });
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c30e052 (Fixed bugs and added new features)
-        const data = await response.json();
-
-        const contact = document.querySelector(`.contact[data-chat-id="${currentChatId}"]`);
-        if (contact.querySelector('small').textContent === 'No messages yet...') {
-<<<<<<< HEAD
-=======
-=======
         if (!response.ok) {
             const error = await response.json();
-            alert(error.detail);  // Display the limit reached message
-            chatMessages.removeChild(thinkingMessage); // Remove thinking message on error
+            alert(error.detail);
             return;
         }
-        const data = await response.json();
-
-        // Update chat name and preview
-        const contact = document.querySelector(`.contact[data-chat-id="${currentChatId}"]`);
-        if (contact.querySelector('small').textContent === 'Hello! I\'m Lumi...') {
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
-            contact.querySelector('p').textContent = extractTopic(messageText);
-            document.getElementById('chat-header').querySelector('h2').textContent = contact.querySelector('p').textContent;
-        }
-        contact.querySelector('small').textContent = data.response.slice(0, 20) + (data.response.length > 20 ? '...' : '');
-
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-        // Remove "thinking..." and add bot response
-        chatMessages.removeChild(thinkingMessage);
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
-        const botMessage = document.createElement('div');
-        botMessage.classList.add('message', 'received');
-        botMessage.innerHTML = `<p>${data.response}</p>`;
-        chatMessages.appendChild(botMessage);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // ... rest of the code
     } catch (error) {
         console.error('Error sending message:', error);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-        chatMessages.removeChild(thinkingMessage); // Remove thinking message on error
         alert('An error occurred while sending your message.');
->>>>>>> 8bbcfc6 (Added some features to UI and modified app.py)
->>>>>>> c30e052 (Fixed bugs and added new features)
     }
 }
 
