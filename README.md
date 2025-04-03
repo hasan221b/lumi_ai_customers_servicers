@@ -1,7 +1,7 @@
-# eCommerce Chatbot with RAG
+# AI-Based cutomers services
 
 ## Overview
-This project is a **Retrieval-Augmented Generation (RAG) based chatbot** designed to assist with eCommerce customer support. The chatbot processes FAQ-style data using FAISS for retrieval and generates responses using an embedding model and an LLM.
+This project is anAI-Based cutomers services using **Retrieval-Augmented Generation (RAG)** designed to assist with eCommerce customer support. The chatbot processes FAQ-style data using FAISS for retrieval and generates responses using an embedding model and an LLM.
 
 ## Features
 - **Fast & Accurate Retrieval**: Uses FAISS to index and retrieve relevant FAQ data.
