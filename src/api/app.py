@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse 
 from pathlib import Path
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from langchain.memory import ConversationSummaryMemory
 
 class ChatbotAPI:
@@ -66,6 +66,64 @@ class ChatbotAPI:
         
         self._setup_routes()
         cleanup_old_chats()
+    def _check_user_limits(self, user_id):
+        '''Check if the user has reached their usage limits and handle lockouts'''
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT chats_created, messages_sent, lockout_until FROM users WHERE user_id = ?", (user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            conn.close()
+            raise HTTPException(status_code=404, detail="User not found")
+        chats_created = user['chats_created']
+        messages_sent = user['messages_sent']
+        lockout_until = user['lockout_until']
+        current_time = datetime.now()
+
+        # Check if user is currently locked out
+        if lockout_until:
+            lockout_time = datetime.fromisoformat(lockout_until)
+            if current_time < lockout_time:
+                remaining_time = (lockout_time - current_time).total_seconds()
+                hours_left = int(remaining_time // 3600)
+                minutes_left = int((remaining_time % 3600) // 60)
+                conn.close()
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Usage limit reached. Please wait {hours_left}h {minutes_left}m before starting a new chat or sending messages."
+                )
+            else:
+                # Lockout period has expired; reset counters
+                cursor.execute(
+                    "UPDATE users SET chats_created = 0, messages_sent = 0, lockout_until = NULL WHERE user_id = ?",
+                    (user_id,)
+                )
+                chats_created = 0
+                messages_sent = 0
+                conn.commit()
+
+        # Check total usage limits
+        max_chats = 2
+        max_messages_per_chat = 5
+        max_total_messages = max_chats * max_messages_per_chat
+
+        if chats_created >= max_chats and messages_sent >= max_total_messages:
+            #User has reached the limit; set a 24-hour lockout
+            lockout_until = current_time + timedelta(hours=24)
+            cursor.execute(
+                'UPDATE users SET lockout_until = ? WHERE user_id = ?',(lockout_until.isoformat(), user_id)
+                            )
+            conn.commit()
+            conn.close()
+            raise HTTPException(
+                status_code=403,
+                detail="Usage limit reached. Please wait 24 hours before starting a new chat or sending messages."
+            )
+
+        conn.close()
+        return chats_created, messages_sent
     
     def _get_or_create_memory(self, chat_id):
         """Get or create a memory instance for a specific chat_id."""
@@ -95,7 +153,10 @@ class ChatbotAPI:
                 user_id = str(uuid.uuid4())
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO users (user_id, created_at) VALUES (?, ?)", (user_id, datetime.now()))
+                cursor.execute(
+                    "INSERT INTO users (user_id, created_at, chats_created, messages_sent, lockout_until) VALUES (?, ?, ?, ?, ?)",
+                    (user_id, datetime.now(), 0, 0, None)
+                )
                 conn.commit()
                 conn.close()
                 response.set_cookie(key='user_id', value=user_id, httponly=True, max_age=604800)
@@ -112,14 +173,21 @@ class ChatbotAPI:
         
         @self.app.post('/start_chat/{user_id}')
         async def start_chat(user_id: str):
+            chats_created, _ = self._check_user_limits(user_id)
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM chats WHERE user_id = ?", (user_id,))
             chat_count = cursor.fetchone()[0]
-            if chat_count >= 5:
+            if chat_count >= 2:
                 conn.close()
-                app_logger.error
+                app_logger.error("Maximum number of active chats (2) reached for user_id: %s", user_id)
                 raise HTTPException(status_code=403, detail="Maximum number of chats (5) reached")
+            
+            # Increment chats_created
+            cursor.execute(
+                "UPDATE users SET chats_created = chats_created + 1 WHERE user_id = ?",
+                (user_id,)
+            )
             chat_name = f"Chat {chat_count + 1}"
             cursor.execute("INSERT INTO chats (user_id, chat_name, summary, created_at, last_updated) VALUES (?, ?, ?, ?, ?)",
                         (user_id, chat_name, "", datetime.now(), datetime.now()))
@@ -165,7 +233,13 @@ class ChatbotAPI:
             
             if sent_message_count >= 5:
                 conn.close()
-                raise HTTPException(status_code=403, detail="Message limit reached (5 messages per chat). Start a new chat to continue.")
+                app_logger.error("Message limit (5) reached for chat_id: %s", chat_id)
+                raise HTTPException(status_code=403, detail="Message limit reached (5 messages per chat). Start a new chat to continue.")            
+            # Increment messages_sent
+            cursor.execute(
+                "UPDATE users SET messages_sent = messages_sent + 1 WHERE user_id = ?",
+                (user_id,)
+            )
             
             # Proceed if limit not reached
             cursor.execute("SELECT summary FROM chats WHERE chat_id = ? AND user_id = ?", (chat_id, user_id))
