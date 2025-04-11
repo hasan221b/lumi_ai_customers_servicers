@@ -20,6 +20,7 @@ class AnswerGenerator:
         self.zero_shot_model = zero_shot_model
         self.intents = ["shipping", "returns", "payment", "product_info", "other"]
         self.greeting_keywords = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"]
+        self.thanking_keywords = ['Thank you','Thanks', 'Ok','bye', 'thx']
         self.prompt = PromptTemplate(
             input_variables=['history', 'context', 'question', 'sentiment',
                              'sentimentS', 'suggestions', 'topic', 'needs_clarification'],
@@ -30,8 +31,9 @@ class AnswerGenerator:
             Conversation History:\n{history}\n\n
             Context:\n{context}\n\n
             Question:\n{question}\n\n
-            {needs_clarification}
-            {suggestions}
+
+            if the question is not clear {needs_clarification}
+             use this suggetsions: {suggestions}
                         '''
         )
         self.rag_chain = (
@@ -93,7 +95,10 @@ class AnswerGenerator:
         """Check if the input is a greeting."""
         question_lower = question.lower().strip()
         return any(keyword in question_lower for keyword in self.greeting_keywords) and len(question_lower.split()) <= 3
-        
+    def is_farewell(self, question):
+        """Check if the input is a greeting."""
+        question_lower = question.lower().strip()
+        return any(keyword in question_lower for keyword in self.thanking_keywords) and len(question_lower.split()) <= 3
     def generator(self, question: str, history: str) -> str:
         '''
         Generate a response using the RAG pipeline with provided history and sentiment analysis.
@@ -112,6 +117,10 @@ class AnswerGenerator:
             if self.is_greeting(question):
                 pipeline_logger.info('Detected greeting, returning simple response')
                 return "Hello! How can I assist you today?"
+            if self.is_farewell(question):
+                pipeline_logger.info('Detected thanking, returning simple response')
+                return "I happy to help you!"
+
             # Proceed with RAG pipeline for non-greetings
             response = self.rag_chain.invoke({'question': question, 'history': history})
             pipeline_logger.info('Response generation completed successfully')
