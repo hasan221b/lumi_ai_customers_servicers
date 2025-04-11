@@ -3,25 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot UI</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Lumi ChatBot</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <div class="chat-container">
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" aria-label="Toggle sidebar" onclick="toggleSidebar()">
+            <svg class="hamburger-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path class="hamburger-line hamburger-line-1" d="M3 6H21" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+                <path class="hamburger-line hamburger-line-2" d="M3 12H21" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+                <path class="hamburger-line hamburger-line-3" d="M3 18H21" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+        
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="/static/bot-icon.png" alt="NeuroSphere Lab Logo" class="logo">
+                <img src="bot-icon.png" alt="NeuroSphere Lab Logo" class="logo">
                 <h2>Chats</h2>
                 <button class="new-chat-btn" onclick="startNewChat()">New Chat with Bot</button>
             </div>
             <div class="contact-list" id="contact-list">
                 <!-- Contacts will be added dynamically -->
             </div>
-            <div class="powered-by">
-                <p>Powered by NeuroSphere Lab</p>
-            </div>
+            
         </div>
 
         <!-- Main Chat Area -->
@@ -36,9 +42,12 @@
                 <input type="text" placeholder="Type a message..." id="message-input">
                 <button onclick="sendMessage()">Send</button>
             </div>
+            <div class="powered-by">
+                <p>Powered by NeuroSphere Lab</p>
+            </div>
         </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
