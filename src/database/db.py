@@ -14,9 +14,12 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS users (
             user_id TEXT PRIMARY KEY,
-            created_at DATETIME
+            created_at DATETIME,
+            chats_created INTEGER DEFAULT 0,  -- Track total chats created
+            messages_sent INTEGER DEFAULT 0,  -- Track total messages sent
+            lockout_until DATETIME  -- Timestamp for lockout period (NULL if not locked out)
         )
     ''')
     cursor.execute('''
