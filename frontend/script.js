@@ -26,12 +26,25 @@ async function init() {
         contactDiv.addEventListener('click', (e) => {
             if (!e.target.classList.contains('delete-chat-btn')) {
                 openChat(chat.chat_id);
+                if (window.innerWidth <= 768) {
+                    toggleSidebar(); // Close sidebar on mobile after selecting a chat
+                }
             }
         });
     });
 
-    // Check if user is locked out and disable UI elements
     await checkUserLimits();
+
+    // Add event listener to close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.querySelector('.mobile-menu-toggle');
+            if (!sidebar.contains(e.target) && !toggleButton.contains(e.target) && sidebar.classList.contains('active')) {
+                toggleSidebar();
+            }
+        }
+    });
 }
 
 async function checkUserLimits() {
@@ -40,7 +53,6 @@ async function checkUserLimits() {
         if (!response.ok) {
             const error = await response.json();
             if (error.detail.includes("Usage limit reached")) {
-                // Disable the "New Chat with Bot" button and message input
                 document.querySelector('.new-chat-btn').disabled = true;
                 document.querySelector('.new-chat-btn').style.opacity = '0.5';
                 document.getElementById('message-input').disabled = true;
@@ -59,7 +71,7 @@ async function startNewChat() {
     if (!response.ok) {
         const error = await response.json();
         alert(error.detail);
-        await checkUserLimits(); // Re-check limits to update UI
+        await checkUserLimits();
         return null;
     }
     const data = await response.json();
@@ -79,10 +91,13 @@ async function startNewChat() {
     contactDiv.addEventListener('click', (e) => {
         if (!e.target.classList.contains('delete-chat-btn')) {
             openChat(data.chat_id);
+            if (window.innerWidth <= 768) {
+                toggleSidebar(); // Close sidebar on mobile
+            }
         }
     });
     openChat(data.chat_id);
-    await checkUserLimits(); // Re-check limits to update UI
+    await checkUserLimits();
     return data.chat_id;
 }
 
@@ -121,7 +136,7 @@ async function deleteChat(chatId) {
             document.getElementById('chat-header').querySelector('h2').textContent = '';
             document.getElementById('chat-messages').innerHTML = '';
         }
-        await checkUserLimits(); // Re-check limits to update UI
+        await checkUserLimits();
     }
 }
 
@@ -162,13 +177,13 @@ async function sendMessage() {
             const error = await response.json();
             alert(error.detail);
             chatMessages.removeChild(thinkingMessage);
-            await checkUserLimits(); // Re-check limits to update UI
+            await checkUserLimits();
             return;
         }
         const data = await response.json();
 
         const contact = document.querySelector(`.contact[data-chat-id="${currentChatId}"]`);
-        if (contact.querySelector('small').textContent === 'Hello! I\'m Lumi...') {
+        if (contact.querySelector('small').textContent === "Hello! I'm Lumi...") {
             contact.querySelector('p').textContent = extractTopic(messageText);
             document.getElementById('chat-header').querySelector('h2').textContent = contact.querySelector('p').textContent;
         }
@@ -180,18 +195,23 @@ async function sendMessage() {
         botMessage.innerHTML = `<p>${data.response}</p>`;
         chatMessages.appendChild(botMessage);
         chatMessages.scrollTop = chatMessages.scrollHeight;
-        await checkUserLimits(); // Re-check limits to update UI
+        await checkUserLimits();
     } catch (error) {
         console.error('Error sending message:', error);
         chatMessages.removeChild(thinkingMessage);
         alert('An error occurred while sending your message.');
-        await checkUserLimits(); // Re-check limits to update UI
+        await checkUserLimits();
     }
 }
 
 function extractTopic(message) {
     const words = message.split(' ').filter(word => word.length > 3);
     return words.length > 0 ? words[0].charAt(0).toUpperCase() + words[0].slice(1) : 'General Chat';
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
 }
 
 document.getElementById('message-input').addEventListener('keypress', (e) => {
