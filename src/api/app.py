@@ -26,7 +26,7 @@ class ChatbotAPI:
         self.embedding_model = self.model_loader.embedding_model
         self.llm_model = self.model_loader.get_llm_model()
         self.sentiment_analyzer = self.model_loader.get_sentiment_model()
-        self.zero_shot_model = self.model_loader.zero_shot_model
+        self.zero_shot_model = self.model_loader.zero_shot_model()
         app_logger.info('Models initialized successfully')
 
         # Process data
