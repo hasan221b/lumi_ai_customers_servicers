@@ -29,6 +29,29 @@ async function init() {
             }
         });
     });
+
+    // Check if user is locked out and disable UI elements
+    await checkUserLimits();
+}
+
+async function checkUserLimits() {
+    try {
+        const response = await fetch(`/start_chat/${currentUserId}`, { method: 'POST' });
+        if (!response.ok) {
+            const error = await response.json();
+            if (error.detail.includes("Usage limit reached")) {
+                // Disable the "New Chat with Bot" button and message input
+                document.querySelector('.new-chat-btn').disabled = true;
+                document.querySelector('.new-chat-btn').style.opacity = '0.5';
+                document.getElementById('message-input').disabled = true;
+                document.getElementById('message-input').placeholder = 'Usage limit reached. Please wait.';
+                document.querySelector('.chat-input button').disabled = true;
+                document.querySelector('.chat-input button').style.opacity = '0.5';
+            }
+        }
+    } catch (error) {
+        console.error('Error checking user limits:', error);
+    }
 }
 
 async function startNewChat() {
@@ -36,7 +59,8 @@ async function startNewChat() {
     if (!response.ok) {
         const error = await response.json();
         alert(error.detail);
-        return;
+        await checkUserLimits(); // Re-check limits to update UI
+        return null;
     }
     const data = await response.json();
     const contactList = document.getElementById('contact-list');
@@ -47,7 +71,7 @@ async function startNewChat() {
         <div class="avatar"></div>
         <div class="contact-info">
             <p>${data.chat_name}</p>
-            <small>Hello! I'm Lumi...</small> <!-- Reflect starter message -->
+            <small>Hello! I'm Lumi...</small>
         </div>
         <button class="delete-chat-btn" onclick="deleteChat(${data.chat_id})">Delete</button>
     `;
@@ -58,6 +82,8 @@ async function startNewChat() {
         }
     });
     openChat(data.chat_id);
+    await checkUserLimits(); // Re-check limits to update UI
+    return data.chat_id;
 }
 
 async function openChat(chatId) {
@@ -70,7 +96,6 @@ async function openChat(chatId) {
         }
     });
 
-    // Fetch and display chat messages
     const response = await fetch(`/chat/${currentUserId}/${chatId}/messages`);
     const data = await response.json();
     const chatHeader = document.getElementById('chat-header');
@@ -96,14 +121,19 @@ async function deleteChat(chatId) {
             document.getElementById('chat-header').querySelector('h2').textContent = '';
             document.getElementById('chat-messages').innerHTML = '';
         }
+        await checkUserLimits(); // Re-check limits to update UI
     }
 }
 
 async function sendMessage() {
     if (currentChatId === null) {
-        alert('Please start a new chat first!');
-        return;
+        const newChatId = await startNewChat();
+        if (newChatId === null) {
+            return;
+        }
+        currentChatId = newChatId;
     }
+
     const input = document.getElementById('message-input');
     const messageText = input.value.trim();
     if (!messageText) return;
@@ -116,7 +146,6 @@ async function sendMessage() {
     input.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Add "thinking..." indicator
     const thinkingMessage = document.createElement('div');
     thinkingMessage.classList.add('message', 'received', 'thinking');
     thinkingMessage.innerHTML = `<p>Thinking...</p>`;
@@ -131,13 +160,13 @@ async function sendMessage() {
         });
         if (!response.ok) {
             const error = await response.json();
-            alert(error.detail);  // Display the limit reached message
-            chatMessages.removeChild(thinkingMessage); // Remove thinking message on error
+            alert(error.detail);
+            chatMessages.removeChild(thinkingMessage);
+            await checkUserLimits(); // Re-check limits to update UI
             return;
         }
         const data = await response.json();
 
-        // Update chat name and preview
         const contact = document.querySelector(`.contact[data-chat-id="${currentChatId}"]`);
         if (contact.querySelector('small').textContent === 'Hello! I\'m Lumi...') {
             contact.querySelector('p').textContent = extractTopic(messageText);
@@ -145,17 +174,18 @@ async function sendMessage() {
         }
         contact.querySelector('small').textContent = data.response.slice(0, 20) + (data.response.length > 20 ? '...' : '');
 
-        // Remove "thinking..." and add bot response
         chatMessages.removeChild(thinkingMessage);
         const botMessage = document.createElement('div');
         botMessage.classList.add('message', 'received');
         botMessage.innerHTML = `<p>${data.response}</p>`;
         chatMessages.appendChild(botMessage);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        await checkUserLimits(); // Re-check limits to update UI
     } catch (error) {
         console.error('Error sending message:', error);
-        chatMessages.removeChild(thinkingMessage); // Remove thinking message on error
+        chatMessages.removeChild(thinkingMessage);
         alert('An error occurred while sending your message.');
+        await checkUserLimits(); // Re-check limits to update UI
     }
 }
 
