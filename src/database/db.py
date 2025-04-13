@@ -3,9 +3,10 @@ from datetime import datetime,timedelta
 
 import os
 
-DB_PATH = os.getenv("DB_PATH", "chatbot.db")  # Default to local, override on Render
+DB_PATH = os.getenv("DB_PATH", "/opt/render/project/data/chatbot.db")  # Default to local, override on Render
 
 def get_db_connection():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
