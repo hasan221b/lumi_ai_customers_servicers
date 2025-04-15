@@ -105,8 +105,8 @@ class ChatbotAPI:
                 conn.commit()
 
         # Check total usage limits
-        max_chats = 2
-        max_messages_per_chat = 5
+        max_chats = 3
+        max_messages_per_chat = 20
         max_total_messages = max_chats * max_messages_per_chat
 
         if chats_created >= max_chats and messages_sent >= max_total_messages:
