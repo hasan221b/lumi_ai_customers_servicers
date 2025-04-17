@@ -26,7 +26,6 @@ class ChatbotAPI:
         self.embedding_model = self.model_loader.embedding_model
         self.llm_model = self.model_loader.get_llm_model()
         self.sentiment_analyzer = self.model_loader.get_sentiment_model()
-        self.zero_shot_model = self.model_loader.zero_shot_model
         app_logger.info('Models initialized successfully')
 
         # Process data
@@ -39,7 +38,7 @@ class ChatbotAPI:
         # Initialize RAG components
         app_logger.info('Initializing RAG components...')
         self.retriever = Retriever(self.embedding_model, self.index, self.df)
-        self.answer_generator = AnswerGenerator(self.llm_model, self.retriever, self.sentiment_analyzer, self.zero_shot_model)
+        self.answer_generator = AnswerGenerator(self.llm_model, self.retriever, self.sentiment_analyzer)
         app_logger.info('RAG components initialized successfully')
         
         # Dictionary to store memory per chat_id
