@@ -179,8 +179,8 @@ class ChatbotAPI:
             chat_count = cursor.fetchone()[0]
             if chat_count >= 2:
                 conn.close()
-                app_logger.error("Maximum number of active chats (2) reached for user_id: %s", user_id)
-                raise HTTPException(status_code=403, detail="Maximum number of chats (5) reached")
+                app_logger.error("Maximum number of active chats (3) reached for user_id: %s", user_id)
+                raise HTTPException(status_code=403, detail="Maximum number of chats (3) reached")
             
             # Increment chats_created
             cursor.execute(
@@ -232,8 +232,8 @@ class ChatbotAPI:
             
             if sent_message_count >= 5:
                 conn.close()
-                app_logger.error("Message limit (5) reached for chat_id: %s", chat_id)
-                raise HTTPException(status_code=403, detail="Message limit reached (5 messages per chat). Start a new chat to continue.")            
+                app_logger.error("Message limit (20) reached for chat_id: %s", chat_id)
+                raise HTTPException(status_code=403, detail="Message limit reached (20 messages per chat). Start a new chat to continue.")            
             # Increment messages_sent
             cursor.execute(
                 "UPDATE users SET messages_sent = messages_sent + 1 WHERE user_id = ?",
