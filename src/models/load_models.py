@@ -12,7 +12,6 @@ class ModelLoader:
             self.embedding_model = SentenceTransformer(config.EMBEDDING_MODEL)
             self.llm_model = ChatOpenAI(model=config.LLM_MODEL,temperature=config.TEMBERATURE,api_key=config.OPENAI_API_KEY)
             self.sentiment_model = pipeline("sentiment-analysis",model=config.SENTIMENT_MODEL)
-            self.zero_shot_model = pipeline("zero-shot-classification", model=config.ZERO_SHOT_MODEL)
             pipeline_logger.info('Initializing Compleated successfully')
 
         except Exception as e:
